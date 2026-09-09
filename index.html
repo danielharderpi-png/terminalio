@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel's Terminal</title> 
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="layout-container">
+        
+        <div class="game-column">
+            <div class="controls">
+                <label for="difficulty">Difficulty: </label>
+                <select id="difficulty">
+                    <option value="practice">Practice</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+                
+                <button id="startBtn">Start / Restart</button>
+                <button id="endBtn">End Game</button>
+            </div>
+
+            <canvas id="gameCanvas" width="1200" height="700"></canvas>
+
+            <div class="leaderboard-panel">
+                <h3>Global Leaderboard (Offline Mode)</h3>
+                <div class="scores-grid" id="leaderboardGrid"></div>
+            </div>
+        </div>
+
+        <div class="profile-column">
+            <img src="assets/anidani.jpg" alt="Daniel" class="profile-pic">
+            <h2>Daniel Harder</h2>
+            
+            <p class="bio-text">
+                IT student with hands-on experience installing and troubleshooting commercial hardware, connectivity, VoIP, security camera systems, and point-to-point wireless equipment. Additional experience as a dispatch supervisor and technical escalation point, troubleshooting issues, coordinating vendors, documenting work, and supporting service-level requirements. Currently halfway through my B.S. in Information Technology.
+            </p>
+            
+            <div class="links">
+                <a href="https://github.com/danielharderpi-png" target="_blank">GitHub Profile</a>
+                <a href="mailto:danielharder.stuff@gmail.com">danielharder.stuff@gmail.com</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- The Name Input Overlay (Hidden by default) -->
+    <div id="nameModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>NEW RECORD IDENTIFIED</h3>
+            <p>Enter User ID for the Leaderboard:</p>
+            <input type="text" id="playerNameInput" maxlength="10" autocomplete="off" placeholder="NAME">
+            <button id="saveNameBtn">Save Record</button>
+        </div>
+    </div>
+
+    <div class="scanlines"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
