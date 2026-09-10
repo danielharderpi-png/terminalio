@@ -434,6 +434,9 @@ function triggerTypoPenalty() {
 }
 
 window.addEventListener('keydown', (e) => {
+    // Prevent the game from listening to keystrokes while the terminal is open
+    if (typeof terminalOpen !== 'undefined' && terminalOpen) return;
+
     if (gameState !== 'playing' || isFlashing || heroState === 'dead') return; 
     if (e.key.length !== 1) return; 
 
@@ -608,7 +611,6 @@ function gameLoop() {
         
         if (activeSprite.frames === 1) {
             heroAnim.holdTimer++;
-            // Reduced to 4 to fix the freezing glitch
             if (heroAnim.holdTimer >= 4) { 
                 if (heroSequence.length > 0) {
                     setHeroState(heroSequence.shift(), heroSequence);
@@ -783,7 +785,7 @@ function gameLoop() {
         if (bossCat.x <= 250 && currentDifficulty !== 'practice' && heroState !== 'dead') {
             bossCat.idleTimer++; 
             if (bossCat.idleTimer >= 45) { 
-                triggerHeroDamage(); // This is the ONLY thing that damages the hero's HP now
+                triggerHeroDamage(); 
                 bossCat.x = canvas.width + 100; 
                 bossCat.hp = 2; 
                 bossCat.state = 'run';
@@ -819,3 +821,154 @@ function endGame(elapsedMs) {
 }
 
 gameLoop();
+
+// --- TERMINAL OVERLAY LOGIC ---
+const terminalOverlay = document.getElementById('terminal-overlay');
+const terminalInput = document.getElementById('terminal-input');
+const terminalOutput = document.getElementById('terminal-output');
+const terminalInputLine = document.querySelector('.terminal-input-line');
+let terminalOpen = false;
+let hasBooted = false; // Tracks if the retro boot sequence has run
+
+// Listen for Left CTRL key to toggle terminal
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'ControlLeft') {
+        terminalOpen = !terminalOpen;
+        if (terminalOpen) {
+            // De-activate the game by simulating an "End Game" click
+            if (typeof gameState !== 'undefined' && gameState === 'playing') {
+                document.getElementById('endBtn').click();
+            }
+
+            terminalOverlay.classList.remove('hidden');
+            
+            // Run the retro boot sequence only on the first open
+            if (!hasBooted) {
+                runBootSequence();
+            } else {
+                terminalInput.value = ''; // Clear previous input
+                setTimeout(() => terminalInput.focus(), 50); 
+            }
+        } else {
+            terminalOverlay.classList.add('hidden');
+            terminalInput.blur();
+        }
+    }
+});
+
+function runBootSequence() {
+    hasBooted = true;
+    terminalInput.disabled = true;
+    terminalOutput.innerHTML = '';
+    terminalInputLine.style.display = 'none'; // Hide the input prompt during boot
+
+    const bootLines = [
+        "Award Modular BIOS v4.51PG, An Energy Star Ally",
+        "Copyright (C) 1984-1998, Award Software, Inc.",
+        "",
+        "PENTIUM II CPU at 400MHz",
+        "Memory Test : 16384K OK",
+        "",
+        "Detecting IDE Primary Master ... WDC WD-800GB",
+        "Detecting IDE Primary Slave  ... CD-ROM Drive",
+        "",
+        "Booting from Floppy... A:\\>",
+        "Mounting /var/www/terminal ... OK",
+        "Starting Apache2 Web Server ... OK",
+        "",
+        "Welcome to TerminalOS v1.0.4"
+    ];
+
+    let delay = 0;
+    bootLines.forEach((line) => {
+        setTimeout(() => {
+            terminalOutput.innerHTML += `<div>${line}</div>`;
+            terminalOverlay.scrollTop = terminalOverlay.scrollHeight;
+        }, delay);
+        // Stagger the text generation to look like an old machine thinking
+        delay += (Math.random() * 300) + 150; 
+    });
+
+    // Re-enable the input prompt after the sequence finishes
+    setTimeout(() => {
+        terminalOutput.innerHTML += `<br>`;
+        terminalInputLine.style.display = 'flex';
+        terminalInput.disabled = false;
+        terminalInput.focus();
+        terminalOverlay.scrollTop = terminalOverlay.scrollHeight;
+    }, delay + 600);
+}
+
+// Handle commands when hitting Enter
+terminalInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const command = terminalInput.value.trim();
+        if (command) {
+            processCommand(command);
+        }
+        terminalInput.value = ''; // Clear input field after running
+    }
+});
+
+function processCommand(cmd) {
+    // Echo the command to the output so the user sees what they typed
+    terminalOutput.innerHTML += `<div><span class="prompt">guest@terminalio:~$</span> ${cmd}</div>`;
+    
+    // Normalize command to lowercase so it works even if they use caps
+    const formattedCmd = cmd.toLowerCase();
+
+    // Command Logic Engine
+    if (formattedCmd === '/help') {
+        terminalOutput.innerHTML += `<div style="color: #aaa; margin: 10px 0;">
+AVAILABLE COMMANDS:<br>
+-------------------<br>
+/sys-check     - Run local hardware and network diagnostics<br>
+/whoami        - Display current user profile credentials<br>
+/clear         - Wipe terminal output<br>
+/close         - Exit the terminal overlay
+</div>`;
+    } else if (formattedCmd === '/sys-check') {
+        // Dynamically fetch client browser and hardware info
+        const cores = navigator.hardwareConcurrency || 'Unknown';
+        const ram = navigator.deviceMemory ? `>=${navigator.deviceMemory}` : 'Unknown';
+        const platform = navigator.platform || 'Unknown';
+        const screenRes = `${window.screen.width}x${window.screen.height}`;
+        
+        // WebGL trick to fetch GPU info
+        let gpu = 'Unknown';
+        try {
+            const tempCanvas = document.createElement('canvas');
+            const gl = tempCanvas.getContext('webgl') || tempCanvas.getContext('experimental-webgl');
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            }
+        } catch (e) {}
+
+        const agent = navigator.userAgent.split(' ')[0]; // Gets basic browser/OS string
+
+        terminalOutput.innerHTML += `<div style="color: #00ff41; margin: 10px 0;">
+[CLIENT DIAGNOSTICS DETECTED]<br>
+Platform: ${platform}<br>
+Logical Cores: ${cores}<br>
+Memory: ${ram} GB<br>
+Display: ${screenRes}<br>
+GPU: ${gpu}<br>
+Agent: ${agent}<br>
+Status: Optimal
+</div>`;
+    
+    } else if (formattedCmd === '/whoami') {
+        terminalOutput.innerHTML += `<div style="color: #aaa; margin: 10px 0;">guest - standard restricted access</div>`;
+    } else if (formattedCmd === '/clear') {
+        terminalOutput.innerHTML = '';
+    } else if (formattedCmd === '/close') {
+        terminalOpen = false;
+        terminalOverlay.classList.add('hidden');
+    } else {
+        terminalOutput.innerHTML += `<div style="color: #ff5555; margin: 10px 0;">Command not found: ${cmd}. Type /help for a list of commands.</div>`;
+    }
+    
+    // Auto-scroll to the bottom of the terminal window
+    terminalOverlay.scrollTop = terminalOverlay.scrollHeight;
+}

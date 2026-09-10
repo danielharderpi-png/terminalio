@@ -15,7 +15,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh; 
-    padding: 10px 0; /* Reduced from 40px 0 */
+    padding: 10px 0;
 }
 
 .layout-container {
@@ -224,4 +224,61 @@ canvas {
     .scores-grid {
         flex-direction: column; 
     }
+}
+
+/* Terminal Hint */
+#terminal-hint {
+    position: fixed;
+    bottom: 10px;
+    right: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+    font-size: 14px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+/* Terminal Overlay */
+#terminal-overlay {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45vh; 
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    color: #00ff00;
+    font-family: monospace;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#terminal-output {
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.terminal-input-line {
+    display: flex;
+    align-items: center;
+}
+
+.prompt {
+    margin-right: 10px;
+    color: #00ff00;
+}
+
+#terminal-input {
+    background: transparent;
+    border: none;
+    color: #00ff00;
+    font-family: monospace;
+    font-size: 16px;
+    flex-grow: 1;
+    outline: none;
 }
