@@ -718,8 +718,12 @@ function gameLoop() {
 
     if (!isFlashing && heroState !== 'dead') {
         frameCount++;
-        let currentSpawnRate = Math.max(150, 300 - Math.floor(score / 20) * 10);
-        if (activeWords.length === 0 || frameCount >= currentSpawnRate) {
+        
+        // Slightly faster base spawn rate to keep the pace up
+        let currentSpawnRate = Math.max(120, 260 - Math.floor(score / 20) * 10);
+        
+        // Keep at least 3 words in play at all times so you never wait
+        if (activeWords.length < 3 || frameCount >= currentSpawnRate) {
             spawnWord();
             frameCount = 0; 
         }
