@@ -15,7 +15,6 @@ function loadSequence(prefix, frameCount) {
 
 // --- SPRITE CONFIGURATION ---
 const sprites = {
-    // Hero Sprites (Using individual frame sequences)
     heroIdle: { isSequence: true, frames: 10, imgs: loadSequence('hero_idle', 10) },
     heroIdleToRun: { isSequence: true, frames: 1, imgs: loadSequence('hero_idleto_run', 1) },
     heroRun: { isSequence: true, frames: 8, imgs: loadSequence('hero_run', 8) },
@@ -23,8 +22,6 @@ const sprites = {
     heroHurt: { isSequence: true, frames: 1, imgs: loadSequence('hero_hurt', 1) },
     heroHurtToIdle: { isSequence: true, frames: 8, imgs: loadSequence('hero_hurt2idle', 8) },
     heroDead: { isSequence: true, frames: 8, imgs: loadSequence('hero_dead', 8) },
-
-    // Cat Sprites (Still using standard sprite sheets)
     catIdle: { img: new Image(), src: 'assets/cat_IDLE.png', frames: 4 },
     catWalk: { img: new Image(), src: 'assets/cat_WALK.png', frames: 8 },
     catRun: { img: new Image(), src: 'assets/cat_RUN.png', frames: 8 },
@@ -33,7 +30,6 @@ const sprites = {
     catAttack: { img: new Image(), src: 'assets/cat_ATTACK 1.png', frames: 8 }
 };
 
-// Assign image sources to trigger browser loading for single sheets
 Object.values(sprites).forEach(sprite => {
     if (!sprite.isSequence) {
         sprite.img.src = sprite.src;
@@ -124,8 +120,10 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+// --- AUDIO LOGIC ---
 const bgMusic = new Audio('assets/backgroundvibe.mp3');
-bgMusic.loop = true; bgMusic.volume = 0; 
+bgMusic.loop = true; 
+bgMusic.volume = 0; 
 const errorSound = new Audio('assets/smallboom.wav');
 const successSound = new Audio('assets/successboom.wav');
 const clackSound = new Audio('assets/clack.wav'); 
@@ -133,20 +131,15 @@ const clackSound = new Audio('assets/clack.wav');
 const smokeImg = new Image();
 smokeImg.src = 'assets/explosion_01.png';
 
-let musicStarted = false;
-document.addEventListener('click', () => {
-    if (!musicStarted) {
-        musicStarted = true;
-        setTimeout(() => {
-            bgMusic.play();
-            let fadeInterval = setInterval(() => {
-                if (bgMusic.volume < 0.35) {
-                    bgMusic.volume = Math.min(0.35, bgMusic.volume + 0.02);
-                } else { clearInterval(fadeInterval); }
-            }, 100); 
-        }, 5000); 
-    }
-}, { once: true }); 
+// Add this right here to load the portrait for the dialogue box
+const heroPortrait = new Image();
+heroPortrait.src = 'assets/hero_portrait.png';
+
+const muteBtn = document.getElementById('muteBtn');
+muteBtn.addEventListener('click', () => {
+    bgMusic.muted = !bgMusic.muted;
+    muteBtn.innerText = bgMusic.muted ? '🔈 Unmute' : '🔊 Mute';
+});
 
 const sharedWords = [
     'ping', 'ssh', 'ftp', 'dns', 'dhcp', 'mac', 'lan', 'wan', 'ram', 'cpu', 
@@ -171,7 +164,7 @@ const wordLibrary = {
         'encapsulation', 'asymmetric', 'symmetric', 'biometrics', 'hypervisor', 
         'provisioning', 'redundancy', 'scalability', 'middleware', 'deployment', 
         'repository', 'powershell', 'wireshark', 'nmap', 'metasploit', 'tcpdump', 
-        'traceroute', 'ActiveDirectory', 'GroupPolicy', 'sysinternals', 'throughput'
+        'traceroute', 'activedirectory', 'grouppolicy', 'sysinternals', 'throughput'
     ]
 };
 
@@ -183,6 +176,8 @@ endBtn.addEventListener('click', () => {
     if (gameState === 'playing') {
         gameState = 'idle';
         bgMusic.pause();
+        bgMusic.currentTime = 0;
+        bgMusic.volume = 0;
         activeWords = [];
         particles = [];
         bossCat.x = canvas.width + 100;
@@ -372,6 +367,14 @@ startBtn.addEventListener('click', () => {
         hurtTimer: 0
     };
 
+    // Start music on game start
+    bgMusic.play();
+    let fadeInterval = setInterval(() => {
+        if (bgMusic.volume < 0.35) {
+            bgMusic.volume = Math.min(0.35, bgMusic.volume + 0.05);
+        } else { clearInterval(fadeInterval); }
+    }, 100); 
+
     spawnWord(); 
 });
 
@@ -392,7 +395,6 @@ canvas.addEventListener('click', (e) => {
     }
 });
 
-// Used ONLY when the cat attacks the hero
 function triggerHeroDamage() {
     totalErrors++; 
     isFlashing = true; 
@@ -417,7 +419,6 @@ function triggerHeroDamage() {
     }
 }
 
-// Docks points and shakes screen, but spares HP
 function triggerTypoPenalty() {
     totalErrors++; 
     score = Math.max(0, score - 5);
@@ -433,31 +434,36 @@ function triggerTypoPenalty() {
     }
 }
 
+// --- UPDATED KEYDOWN LISTENER ---
 window.addEventListener('keydown', (e) => {
-    // Prevent the game from listening to keystrokes while the terminal is open
     if (typeof terminalOpen !== 'undefined' && terminalOpen) return;
-
     if (gameState !== 'playing' || isFlashing || heroState === 'dead') return; 
+    
+    // Ignore the spacebar entirely
+    if (e.code === 'Space') return; 
     if (e.key.length !== 1) return; 
+
+    // Convert all keystrokes to lowercase to ignore Caps Lock/Shift
+    const key = e.key.toLowerCase(); 
 
     clackSound.currentTime = 0;
     clackSound.play();
 
     if (!targetedWord) {
-        let possibleTargets = activeWords.filter(w => w.text.startsWith(e.key));
+        let possibleTargets = activeWords.filter(w => w.text.startsWith(key));
         
         if (possibleTargets.length > 0) {
             possibleTargets.sort((a, b) => a.x - b.x); 
             targetedWord = possibleTargets[0];
-            targetedWord.typed += e.key;
+            targetedWord.typed += key;
             totalKeysTyped++;
         } else {
             triggerTypoPenalty(); 
         }
     } else {
-        const expectedLetter = targetedWord.text[targetedWord.typed.length];
-        if (e.key === expectedLetter) {
-            targetedWord.typed += e.key;
+        const expectedLetter = targetedWord.text[targetedWord.typed.length].toLowerCase();
+        if (key === expectedLetter) {
+            targetedWord.typed += key;
             totalKeysTyped++; 
             
             if (targetedWord.typed === targetedWord.text) {
@@ -515,7 +521,6 @@ function gameLoop() {
         ctx.fillStyle = '#00ff41'; ctx.font = '24px monospace';
         ctx.fillText("START", canvas.width / 2 - 35, canvas.height / 2 + 48);
 
-        // Draw idle hero on ready screen with scaling
         let activeSprite = sprites.heroIdle;
         let frameImg = activeSprite.imgs[heroAnim.frameX];
 
@@ -539,23 +544,75 @@ function gameLoop() {
     }
 
     if (gameState === 'gameover') {
-        ctx.fillStyle = '#00ff41'; ctx.font = '40px monospace';
-        ctx.fillText("SYSTEM FAILURE", canvas.width / 2 - 160, canvas.height / 2 - 40);
-        ctx.font = '20px monospace';
-        ctx.fillText(`Final Score: ${score}`, canvas.width / 2 - 90, canvas.height / 2 + 10);
-        ctx.fillText(`Net Speed: ${finalWPM} WPM`, canvas.width / 2 - 90, canvas.height / 2 + 40);
-        
-        // Lock to last frame of death animation with scaling
-        let activeSprite = sprites.heroDead;
-        let frameImg = activeSprite.imgs[activeSprite.frames - 1];
+        if (heroHP <= 0) {
+            // --- DEATH SCREEN (HP hits 0) ---
+            ctx.fillStyle = '#ff003c'; ctx.font = '40px monospace';
+            ctx.fillText("SYSTEM FAILURE", canvas.width / 2 - 160, canvas.height / 2 - 40);
+            ctx.fillStyle = '#00ff41'; ctx.font = '20px monospace';
+            ctx.fillText(`Final Score: ${score}`, canvas.width / 2 - 90, canvas.height / 2 + 10);
+            ctx.fillText(`Net Speed: ${finalWPM} WPM`, canvas.width / 2 - 90, canvas.height / 2 + 40);
+            
+            let activeSprite = sprites.heroDead;
+            let frameImg = activeSprite.imgs[activeSprite.frames - 1];
 
-        if (frameImg && frameImg.complete && frameImg.width > 0) {
-            const heroScale = 3; 
-            let destWidth = frameImg.width * heroScale;
-            let destHeight = frameImg.height * heroScale;
-            let destY = (canvas.height - 90) - destHeight;
+            if (frameImg && frameImg.complete && frameImg.width > 0) {
+                const heroScale = 3; 
+                let destWidth = frameImg.width * heroScale;
+                let destHeight = frameImg.height * heroScale;
+                let destY = (canvas.height - 90) - destHeight;
+                ctx.drawImage(frameImg, 0, 0, frameImg.width, frameImg.height, 150, destY, destWidth, destHeight);
+            }
+        } else {
+            // --- SURVIVAL SCREEN (Timer ran out) ---
+            ctx.fillStyle = '#00ff41'; ctx.font = '40px monospace';
+            ctx.fillText("TIME UP - SURVIVED", canvas.width / 2 - 200, canvas.height / 2 - 90);
+            ctx.font = '20px monospace';
+            ctx.fillText(`Final Score: ${score}`, canvas.width / 2 - 90, canvas.height / 2 - 50);
+            ctx.fillText(`Net Speed: ${finalWPM} WPM`, canvas.width / 2 - 90, canvas.height / 2 - 20);
 
-            ctx.drawImage(frameImg, 0, 0, frameImg.width, frameImg.height, 150, destY, destWidth, destHeight);
+            // Draw Dialogue Box
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(canvas.width / 2 - 250, canvas.height / 2 + 20, 500, 100, 10);
+                ctx.fill();
+                ctx.strokeStyle = '#00ff41';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            } else {
+                ctx.fillRect(canvas.width / 2 - 250, canvas.height / 2 + 20, 500, 100);
+                ctx.strokeStyle = '#00ff41';
+                ctx.strokeRect(canvas.width / 2 - 250, canvas.height / 2 + 20, 500, 100);
+            }
+
+            // Draw Portrait (Assuming 80x80 size)
+            if (heroPortrait.complete && heroPortrait.width > 0) {
+                ctx.drawImage(heroPortrait, canvas.width / 2 - 240, canvas.height / 2 + 30, 80, 80);
+            }
+
+            // Draw Dwarven Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '18px monospace';
+            ctx.fillText('"Aye, fine work lad! Ye type like', canvas.width / 2 - 140, canvas.height / 2 + 55);
+            ctx.fillText('a true champion of the deep halls!"', canvas.width / 2 - 140, canvas.height / 2 + 85);
+
+            // Animate the Idle Hero
+            let activeSprite = sprites.heroIdle;
+            let frameImg = activeSprite.imgs[heroAnim.frameX];
+
+            if (frameImg && frameImg.complete && frameImg.width > 0) {
+                heroAnim.frameTimer++;
+                if (heroAnim.frameTimer >= 6) { 
+                    heroAnim.frameX = (heroAnim.frameX + 1) % activeSprite.frames;
+                    heroAnim.frameTimer = 0;
+                }
+                
+                const heroScale = 3; 
+                let destWidth = frameImg.width * heroScale;
+                let destHeight = frameImg.height * heroScale;
+                let destY = (canvas.height - 90) - destHeight;
+                ctx.drawImage(frameImg, 0, 0, frameImg.width, frameImg.height, 150, destY, destWidth, destHeight);
+            }
         }
 
         requestAnimationFrame(gameLoop);
@@ -563,17 +620,20 @@ function gameLoop() {
     }
 
     let elapsedMs = Date.now() - startTime;
-    let timeLimitMs = 5 * 60 * 1000; 
+    
+    // Set 5 minutes (300,000ms) for practice mode, and 90 seconds (90,000ms) for medium and hard
+    let timeLimitMs = (currentDifficulty === 'practice') ? (5 * 60 * 1000) : (90 * 1000); 
 
     if (elapsedMs >= timeLimitMs) {
         endGame(elapsedMs);
     }
 
-    let minutes = Math.floor(elapsedMs / 60000);
-    let seconds = Math.floor((elapsedMs % 60000) / 1000);
+    // Calculate remaining time for the countdown
+    let remainingMs = Math.max(0, timeLimitMs - elapsedMs);
+    let minutes = Math.floor(remainingMs / 60000);
+    let seconds = Math.floor((remainingMs % 60000) / 1000);
     let formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
-    // --- HERO STATE MACHINE & DRAWING ---
     let hSpriteMap = {
         'idle': sprites.heroIdle,
         'idle2run': sprites.heroIdleToRun,
@@ -717,7 +777,6 @@ function gameLoop() {
             ctx.fillText(restOfWord, w.x + typedWidth + nextLetterWidth, w.y);
         }
 
-        // Missed word penalty: docks score in ALL modes, never damages HP
         if (w.x < -100) {
             activeWords = activeWords.filter(active => active !== w);
             score = Math.max(0, score - 10);
@@ -805,10 +864,18 @@ function gameLoop() {
 function endGame(elapsedMs) {
     if (gameState === 'gameover') return; 
     gameState = 'gameover';
+
+    // If time ran out and we are still alive, go back to idle
+    if (heroHP > 0) {
+        setHeroState('idle', []);
+    }
+
     let minutesPlayed = elapsedMs / 60000;
     let grossWords = (totalKeysTyped / 5);
     finalWPM = Math.max(0, Math.round((grossWords - totalErrors) / minutesPlayed));
+    
     bgMusic.pause();
+    bgMusic.currentTime = 0;
 
     if (score > 0) {
         if (!sessionPlayer) {
@@ -828,25 +895,23 @@ const terminalInput = document.getElementById('terminal-input');
 const terminalOutput = document.getElementById('terminal-output');
 const terminalInputLine = document.querySelector('.terminal-input-line');
 let terminalOpen = false;
-let hasBooted = false; // Tracks if the retro boot sequence has run
+let hasBooted = false; 
 
 // Listen for Left CTRL key to toggle terminal
 document.addEventListener('keydown', (e) => {
     if (e.code === 'ControlLeft') {
         terminalOpen = !terminalOpen;
         if (terminalOpen) {
-            // De-activate the game by simulating an "End Game" click
             if (typeof gameState !== 'undefined' && gameState === 'playing') {
                 document.getElementById('endBtn').click();
             }
 
             terminalOverlay.classList.remove('hidden');
             
-            // Run the retro boot sequence only on the first open
             if (!hasBooted) {
                 runBootSequence();
             } else {
-                terminalInput.value = ''; // Clear previous input
+                terminalInput.value = ''; 
                 setTimeout(() => terminalInput.focus(), 50); 
             }
         } else {
@@ -860,23 +925,23 @@ function runBootSequence() {
     hasBooted = true;
     terminalInput.disabled = true;
     terminalOutput.innerHTML = '';
-    terminalInputLine.style.display = 'none'; // Hide the input prompt during boot
+    terminalInputLine.style.display = 'none'; 
 
+    // Updated Diagnostic Boot Sequence
     const bootLines = [
-        "Award Modular BIOS v4.51PG, An Energy Star Ally",
-        "Copyright (C) 1984-1998, Award Software, Inc.",
-        "",
-        "PENTIUM II CPU at 400MHz",
-        "Memory Test : 16384K OK",
-        "",
-        "Detecting IDE Primary Master ... WDC WD-800GB",
-        "Detecting IDE Primary Slave  ... CD-ROM Drive",
-        "",
-        "Booting from Floppy... A:\\>",
-        "Mounting /var/www/terminal ... OK",
-        "Starting Apache2 Web Server ... OK",
-        "",
-        "Welcome to TerminalOS v1.0.4"
+        "[00.388] initializing sandbox...",
+        "[00.401] mounting local filesystem...",
+        "[00.417] starting diagnostic service...",
+        "[00.433] starting network service...",
+        "[00.449] starting guest session...",
+        "<br>[00.452] running environment verification...<br>",
+        "filesystem ............ <span style='color: #00ff41;'>OK</span>",
+        "network ............... <span style='color: #00ff41;'>OK</span>",
+        "runtime ............... <span style='color: #00ff41;'>OK</span>",
+        "permissions ........... <span style='color: #00ff41;'>OK</span><br>",
+        "[00.501] loading terminal interface...",
+        "[00.512] terminal interface ready<br>",
+        "SYSTEM STATUS: <span style='color: #00ff41;'>NOMINAL</span>"
     ];
 
     let delay = 0;
@@ -885,19 +950,28 @@ function runBootSequence() {
             terminalOutput.innerHTML += `<div>${line}</div>`;
             terminalOverlay.scrollTop = terminalOverlay.scrollHeight;
         }, delay);
-        // Stagger the text generation to look like an old machine thinking
         delay += (Math.random() * 300) + 150; 
     });
 
-    // Re-enable the input prompt after the sequence finishes
     setTimeout(() => {
         terminalOutput.innerHTML += `<br>`;
         terminalInputLine.style.display = 'flex';
         terminalInput.disabled = false;
+        
+        // Adds the blinking hint as a placeholder
+        terminalInput.placeholder = '/help to begin';
+        terminalInput.classList.add('blink-placeholder');
+        
         terminalInput.focus();
         terminalOverlay.scrollTop = terminalOverlay.scrollHeight;
     }, delay + 600);
 }
+
+// Clear the placeholder completely as soon as the user types
+terminalInput.addEventListener('input', () => {
+    terminalInput.classList.remove('blink-placeholder');
+    terminalInput.placeholder = ''; // Wipes the text so it never comes back
+});
 
 // Handle commands when hitting Enter
 terminalInput.addEventListener('keydown', (e) => {
@@ -906,18 +980,15 @@ terminalInput.addEventListener('keydown', (e) => {
         if (command) {
             processCommand(command);
         }
-        terminalInput.value = ''; // Clear input field after running
+        terminalInput.value = ''; // Just clear the input field, don't reset the placeholder
     }
 });
 
 function processCommand(cmd) {
-    // Echo the command to the output so the user sees what they typed
     terminalOutput.innerHTML += `<div><span class="prompt">guest@terminalio:~$</span> ${cmd}</div>`;
     
-    // Normalize command to lowercase so it works even if they use caps
     const formattedCmd = cmd.toLowerCase();
 
-    // Command Logic Engine
     if (formattedCmd === '/help') {
         terminalOutput.innerHTML += `<div style="color: #aaa; margin: 10px 0;">
 AVAILABLE COMMANDS:<br>
@@ -928,13 +999,11 @@ AVAILABLE COMMANDS:<br>
 /close         - Exit the terminal overlay
 </div>`;
     } else if (formattedCmd === '/sys-check') {
-        // Dynamically fetch client browser and hardware info
         const cores = navigator.hardwareConcurrency || 'Unknown';
         const ram = navigator.deviceMemory ? `>=${navigator.deviceMemory}` : 'Unknown';
         const platform = navigator.platform || 'Unknown';
         const screenRes = `${window.screen.width}x${window.screen.height}`;
         
-        // WebGL trick to fetch GPU info
         let gpu = 'Unknown';
         try {
             const tempCanvas = document.createElement('canvas');
@@ -945,7 +1014,7 @@ AVAILABLE COMMANDS:<br>
             }
         } catch (e) {}
 
-        const agent = navigator.userAgent.split(' ')[0]; // Gets basic browser/OS string
+        const agent = navigator.userAgent.split(' ')[0]; 
 
         terminalOutput.innerHTML += `<div style="color: #00ff41; margin: 10px 0;">
 [CLIENT DIAGNOSTICS DETECTED]<br>
@@ -957,7 +1026,6 @@ GPU: ${gpu}<br>
 Agent: ${agent}<br>
 Status: Optimal
 </div>`;
-    
     } else if (formattedCmd === '/whoami') {
         terminalOutput.innerHTML += `<div style="color: #aaa; margin: 10px 0;">guest - standard restricted access</div>`;
     } else if (formattedCmd === '/clear') {
@@ -969,6 +1037,5 @@ Status: Optimal
         terminalOutput.innerHTML += `<div style="color: #ff5555; margin: 10px 0;">Command not found: ${cmd}. Type /help for a list of commands.</div>`;
     }
     
-    // Auto-scroll to the bottom of the terminal window
     terminalOverlay.scrollTop = terminalOverlay.scrollHeight;
 }

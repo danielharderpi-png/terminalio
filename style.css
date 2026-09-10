@@ -282,3 +282,13 @@ canvas {
     flex-grow: 1;
     outline: none;
 }
+
+/* Blinking Placeholder for Terminal Hint */
+.blink-placeholder::placeholder {
+    color: rgba(0, 255, 65, 0.6);
+    animation: blink 1.5s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
