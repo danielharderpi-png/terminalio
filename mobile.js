@@ -11,10 +11,10 @@ resizeMobileCanvas();
 // --- ASSET LOADING ---
 const bgLayers = [];
 const bgFilenames = [
-    'bg_1.png',
-    'bg_2.png',
-    'bg_3.png',
-    'bg_4.png'
+    'bg_1.png', 
+    'bg_2.png', 
+    'bg_3.png', 
+    'bg_4.png'  
 ];
 
 bgFilenames.forEach((filename, index) => {
@@ -46,10 +46,18 @@ playerPortraitImg.src = 'assets/player_portrait.png';
 const heroTextboxImg = new Image();
 heroTextboxImg.src = 'assets/hero_textbox.png';
 
+// Spawn Animation Assets
+const spawnFrames = [];
+['spawn_1.png', 'spawn_2.png', 'spawn_3.png'].forEach(src => {
+    let img = new Image();
+    img.src = `assets/${src}`;
+    spawnFrames.push(img);
+});
+
 // --- PHYSICS & PLAYER VARIABLES ---
 let gravity = 0.6;
 let jumpStrength = -12;
-let gameState = 'idle'; 
+let gameState = 'idle'; // Options: 'idle', 'spawning', 'playing'
 
 let player = {
     x: 50,
@@ -64,19 +72,25 @@ let player = {
     attackTimer: 0
 };
 
+let spawnData = {
+    frameIndex: 0,
+    timer: 0,
+    maxTimer: 6 
+};
+
 // --- GAME LOOP ---
 function mobileGameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 1. Draw Parallax Backgrounds
-    bgLayers.forEach((layer) => {
+    bgLayers.forEach((layer, index) => {
         if (layer.img.complete && layer.img.width > 0) {
             let scale = canvas.height / layer.img.height;
             let scaledWidth = Math.ceil(layer.img.width * scale);
             
             let currentSpeed = layer.speed;
             if (gameState === 'idle') {
-                currentSpeed = layer.speed * 0.25; 
+                currentSpeed = (index === 1) ? layer.speed * 0.5 : 0; 
             }
 
             layer.x = (layer.x - currentSpeed) % scaledWidth;
@@ -91,7 +105,7 @@ function mobileGameLoop() {
     const floorY = canvas.height - 20; 
 
     if (gameState === 'idle') {
-        // --- IDLE SCREEN UI (Scaled Up) ---
+        // --- IDLE SCREEN UI ---
         
         const boxWidth = 400;
         const boxHeight = 120;
@@ -102,28 +116,49 @@ function mobileGameLoop() {
         const portX = boxX - portSize + 30; 
         const portY = boxY - 10; 
 
-        // 1. Textbox Background
         if (heroTextboxImg.complete) {
             ctx.drawImage(heroTextboxImg, boxX, boxY, boxWidth, boxHeight);
         }
 
-        // 2. Portrait Frame (Solid center, so we draw it before the face)
         if (portraitFrameImg.complete) {
             ctx.drawImage(portraitFrameImg, portX, portY, portSize, portSize);
         }
 
-        // 3. Player Face (Drawn on top, scaled to fit inside the metal border)
         if (playerPortraitImg.complete) {
             ctx.drawImage(playerPortraitImg, portX + 16, portY + 16, portSize - 32, portSize - 32);
         }
 
-        // Dialogue Text
         ctx.fillStyle = '#ffffff'; 
         ctx.font = '28px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText("TAAAAP ALLLREADY!!", boxX + boxWidth / 2 + 10, boxY + boxHeight / 2);
         ctx.textAlign = 'left'; 
+        
+    } else if (gameState === 'spawning') {
+        // --- SPAWN ANIMATION SEQUENCE ---
+        
+        let currentSpawnImg = spawnFrames[spawnData.frameIndex];
+        
+        if (currentSpawnImg && currentSpawnImg.complete) {
+            // Nudge this value up or down if the circle still isn't sitting right under his boots
+            const spawnYOffset = 20;
+            ctx.drawImage(currentSpawnImg, player.x, (floorY - player.height) + spawnYOffset, player.width, player.height);
+        }
+
+        spawnData.timer++;
+        if (spawnData.timer > spawnData.maxTimer) {
+            spawnData.timer = 0;
+            spawnData.frameIndex++;
+            
+            if (spawnData.frameIndex >= spawnFrames.length) {
+                gameState = 'playing';
+                player.y = floorY - player.height;
+                player.velocityY = 0;
+                player.isGrounded = true;
+                player.state = 'run';
+            }
+        }
         
     } else if (gameState === 'playing') {
         // --- ACTIVE GAMEPLAY ---
@@ -163,7 +198,14 @@ function mobileGameLoop() {
         }
 
         if (currentImg && currentImg.complete && currentImg.width > 0) {
-            ctx.drawImage(currentImg, player.x, player.y, player.width, player.height);
+            let drawWidth = player.width;
+            
+            if (player.state === 'attack') {
+                const aspectRatio = currentImg.width / currentImg.height;
+                drawWidth = player.height * aspectRatio;
+            }
+            
+            ctx.drawImage(currentImg, player.x, player.y, drawWidth, player.height);
         } else {
             ctx.fillStyle = '#00ff41';
             ctx.fillRect(player.x, player.y, player.width, player.height);
@@ -178,13 +220,14 @@ window.addEventListener('touchstart', (e) => {
     e.preventDefault(); 
     
     if (gameState === 'idle') {
-        gameState = 'playing';
-        player.y = canvas.height - 20 - player.height;
-        player.velocityY = 0;
-        player.isGrounded = true;
-        player.state = 'run';
+        gameState = 'spawning';
+        spawnData.frameIndex = 0;
+        spawnData.timer = 0;
+        document.getElementById('backBtn').style.display = 'block';
         return;
     }
+
+    if (gameState === 'spawning') return;
 
     const touchX = e.touches[0].clientX;
     const screenCenter = window.innerWidth / 2;
@@ -200,5 +243,94 @@ window.addEventListener('touchstart', (e) => {
         player.attackTimer = 15; 
     }
 }, { passive: false });
+
+
+// --- MOBILE UI OVERRIDES ---
+
+document.body.style.backgroundColor = '#000000';
+document.body.style.backgroundImage = 'none';
+
+document.querySelectorAll('*').forEach(el => {
+    if (el.children.length === 0 && el.textContent && el.textContent.includes('[LEFT CTRL]')) {
+        el.style.display = 'none';
+    }
+});
+
+const mobileTerminalContainer = document.createElement('div');
+mobileTerminalContainer.style.position = 'absolute';
+mobileTerminalContainer.style.bottom = '2px'; 
+mobileTerminalContainer.style.right = '25px';
+mobileTerminalContainer.style.zIndex = '1000';
+mobileTerminalContainer.style.display = 'flex';
+mobileTerminalContainer.style.flexDirection = 'column';
+mobileTerminalContainer.style.alignItems = 'flex-end';
+
+const terminalBox = document.createElement('div');
+terminalBox.style.display = 'none'; 
+terminalBox.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+terminalBox.style.color = '#00ff41';
+terminalBox.style.border = '1px solid #00ff41';
+terminalBox.style.padding = '10px';
+terminalBox.style.marginBottom = '2px';
+terminalBox.style.fontFamily = 'monospace';
+terminalBox.style.fontSize = '14px';
+terminalBox.style.borderRadius = '4px';
+terminalBox.innerText = 'danielharder.stuff@gmail.com';
+
+const toggleBtn = document.createElement('div');
+toggleBtn.innerText = 'X';
+toggleBtn.style.color = '#00ff41';
+toggleBtn.style.fontFamily = 'monospace';
+toggleBtn.style.fontSize = '24px';
+toggleBtn.style.fontWeight = 'bold';
+toggleBtn.style.cursor = 'pointer';
+toggleBtn.style.userSelect = 'none';
+
+toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    if (terminalBox.style.display === 'none') {
+        terminalBox.style.display = 'block';
+        toggleBtn.innerText = 'V';
+    } else {
+        terminalBox.style.display = 'none';
+        toggleBtn.innerText = 'X';
+    }
+});
+
+terminalBox.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
+toggleBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
+
+mobileTerminalContainer.appendChild(terminalBox);
+mobileTerminalContainer.appendChild(toggleBtn);
+document.body.appendChild(mobileTerminalContainer);
+
+// Build the Back Arrow UI
+const backBtn = document.createElement('div');
+backBtn.id = 'backBtn';
+backBtn.innerText = '<';
+backBtn.style.color = '#00ff41';
+backBtn.style.fontFamily = 'monospace';
+backBtn.style.fontSize = '28px';
+backBtn.style.fontWeight = 'bold';
+backBtn.style.position = 'absolute';
+backBtn.style.top = '2px'; 
+backBtn.style.right = '25px';
+backBtn.style.cursor = 'pointer';
+backBtn.style.userSelect = 'none';
+backBtn.style.zIndex = '1000';
+backBtn.style.display = 'none'; 
+
+const handleBack = (e) => {
+    e.stopPropagation(); 
+    if (gameState === 'playing' || gameState === 'spawning') {
+        gameState = 'idle';
+        backBtn.style.display = 'none';
+    }
+};
+
+backBtn.addEventListener('click', handleBack);
+backBtn.addEventListener('touchstart', handleBack, { passive: false });
+
+document.body.appendChild(backBtn);
 
 mobileGameLoop();
