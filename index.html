@@ -72,6 +72,18 @@
 
     <div class="scanlines"></div>
 
-    <script src="script.js"></script>
+    <script>
+    // Check if the user is on a mobile device
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        let mobileScript = document.createElement('script');
+        mobileScript.src = 'mobile.js';
+        document.body.appendChild(mobileScript);
+    } else {
+        // Otherwise, load the desktop terminal game
+        let desktopScript = document.createElement('script');
+        desktopScript.src = 'script.js';
+        document.body.appendChild(desktopScript);
+    }
+</script>
 </body>
 </html>
