@@ -79,10 +79,20 @@ let spawnData = {
 };
 
 // --- GAME LOOP ---
-function mobileGameLoop() {
+let lastTime = 0; 
+
+function mobileGameLoop(timestamp) {
+    // 1. Calculate Delta Time
+    if (!lastTime) lastTime = timestamp;
+    const deltaTime = timestamp - lastTime;
+    lastTime = timestamp;
+    
+    // Base the speed on a 60FPS target (approx 16.67ms per frame)
+    const timeScale = deltaTime / 16.67;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Draw Parallax Backgrounds
+    // 2. Draw Parallax Backgrounds
     bgLayers.forEach((layer, index) => {
         if (layer.img.complete && layer.img.width > 0) {
             let scale = canvas.height / layer.img.height;
@@ -93,7 +103,7 @@ function mobileGameLoop() {
                 currentSpeed = (index === 1) ? layer.speed * 0.5 : 0; 
             }
 
-            layer.x = (layer.x - currentSpeed) % scaledWidth;
+            layer.x = (layer.x - (currentSpeed * timeScale)) % scaledWidth;
 
             for (let i = 0; i < 4; i++) {
                 let drawX = layer.x + (i * scaledWidth);
@@ -141,12 +151,11 @@ function mobileGameLoop() {
         let currentSpawnImg = spawnFrames[spawnData.frameIndex];
         
         if (currentSpawnImg && currentSpawnImg.complete) {
-            // Nudge this value up or down if the circle still isn't sitting right under his boots
             const spawnYOffset = 20;
             ctx.drawImage(currentSpawnImg, player.x, (floorY - player.height) + spawnYOffset, player.width, player.height);
         }
 
-        spawnData.timer++;
+        spawnData.timer += timeScale;
         if (spawnData.timer > spawnData.maxTimer) {
             spawnData.timer = 0;
             spawnData.frameIndex++;
@@ -163,8 +172,8 @@ function mobileGameLoop() {
     } else if (gameState === 'playing') {
         // --- ACTIVE GAMEPLAY ---
         
-        player.velocityY += gravity;
-        player.y += player.velocityY;
+        player.velocityY += (gravity * timeScale);
+        player.y += (player.velocityY * timeScale);
 
         if (player.y + player.height >= floorY) {
             player.y = floorY - player.height;
@@ -177,7 +186,7 @@ function mobileGameLoop() {
         }
 
         if (player.state === 'attack') {
-            player.attackTimer--;
+            player.attackTimer -= timeScale;
             if (player.attackTimer <= 0) {
                 player.state = player.isGrounded ? 'run' : 'jump';
             }
@@ -190,7 +199,7 @@ function mobileGameLoop() {
             currentImg = jumpImg;
         } else {
             currentImg = runFrames[player.frameIndex];
-            player.animTimer++;
+            player.animTimer += timeScale;
             if (player.animTimer > 6) { 
                 player.frameIndex = (player.frameIndex + 1) % runFrames.length;
                 player.animTimer = 0;
@@ -247,17 +256,8 @@ window.addEventListener('touchstart', (e) => {
 
 // --- MOBILE UI OVERRIDES ---
 
-// --- MOBILE UI OVERRIDES ---
-
 document.body.style.backgroundColor = '#000000';
 document.body.style.backgroundImage = 'none';
-
-// Hide desktop-specific UI elements
-const desktopElements = ['.controls', '.profile-column', '.leaderboard-panel', '#terminal-hint'];
-desktopElements.forEach(selector => {
-    const el = document.querySelector(selector);
-    if (el) el.style.display = 'none';
-});
 
 // Strip padding and borders from the layout container so the canvas sits flush
 const gameColumn = document.querySelector('.game-column');
@@ -276,7 +276,7 @@ if (layoutContainer) {
 
 const mobileTerminalContainer = document.createElement('div');
 mobileTerminalContainer.style.position = 'absolute';
-mobileTerminalContainer.style.bottom = '2px'; 
+mobileTerminalContainer.style.bottom = '2.5dvh'; 
 mobileTerminalContainer.style.right = '25px';
 mobileTerminalContainer.style.zIndex = '1000';
 mobileTerminalContainer.style.display = 'flex';
@@ -331,7 +331,7 @@ backBtn.style.fontFamily = 'monospace';
 backBtn.style.fontSize = '28px';
 backBtn.style.fontWeight = 'bold';
 backBtn.style.position = 'absolute';
-backBtn.style.top = '2px'; 
+backBtn.style.top = '2.5dvh'; 
 backBtn.style.right = '25px';
 backBtn.style.cursor = 'pointer';
 backBtn.style.userSelect = 'none';
@@ -351,4 +351,4 @@ backBtn.addEventListener('touchstart', handleBack, { passive: false });
 
 document.body.appendChild(backBtn);
 
-mobileGameLoop();
+requestAnimationFrame(mobileGameLoop);
