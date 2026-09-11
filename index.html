@@ -74,7 +74,7 @@
 
     <script>
     // Check if the user is on a mobile device
-    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.matchMedia("(pointer: coarse)").matches) {
         let mobileScript = document.createElement('script');
         mobileScript.src = 'mobile.js';
         document.body.appendChild(mobileScript);
