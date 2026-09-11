@@ -293,7 +293,7 @@ canvas {
     50% { opacity: 0; }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1024px), (pointer: coarse) {
     body {
         height: 100dvh;
         min-height: 100dvh;
