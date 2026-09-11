@@ -247,14 +247,32 @@ window.addEventListener('touchstart', (e) => {
 
 // --- MOBILE UI OVERRIDES ---
 
+// --- MOBILE UI OVERRIDES ---
+
 document.body.style.backgroundColor = '#000000';
 document.body.style.backgroundImage = 'none';
 
-document.querySelectorAll('*').forEach(el => {
-    if (el.children.length === 0 && el.textContent && el.textContent.includes('[LEFT CTRL]')) {
-        el.style.display = 'none';
-    }
+// Hide desktop-specific UI elements
+const desktopElements = ['.controls', '.profile-column', '.leaderboard-panel', '#terminal-hint'];
+desktopElements.forEach(selector => {
+    const el = document.querySelector(selector);
+    if (el) el.style.display = 'none';
 });
+
+// Strip padding and borders from the layout container so the canvas sits flush
+const gameColumn = document.querySelector('.game-column');
+if (gameColumn) {
+    gameColumn.style.padding = '0';
+    gameColumn.style.border = 'none';
+    gameColumn.style.backgroundColor = 'transparent';
+    gameColumn.style.backdropFilter = 'none';
+}
+
+const layoutContainer = document.querySelector('.layout-container');
+if (layoutContainer) {
+    layoutContainer.style.margin = '0';
+    layoutContainer.style.width = '100%';
+}
 
 const mobileTerminalContainer = document.createElement('div');
 mobileTerminalContainer.style.position = 'absolute';
