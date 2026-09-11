@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 
 function resizeMobileCanvas() {
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight * 0.85; 
+    canvas.height = window.innerHeight * 0.98; 
 }
 window.addEventListener('resize', resizeMobileCanvas);
 resizeMobileCanvas();

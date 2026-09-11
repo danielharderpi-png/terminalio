@@ -299,10 +299,12 @@ canvas {
         min-height: 100dvh;
         padding: 0;
         overflow: hidden;
-    }
-    .controls, .profile-column, .leaderboard-panel {
+        }
+    /* Add #terminal-hint right here */
+    .controls, .profile-column, .leaderboard-panel, #terminal-hint {
         display: none !important;
     }
+    
     .game-column {
         padding: 0;
         border: none;
