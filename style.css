@@ -292,21 +292,33 @@ canvas {
 @keyframes blink {
     50% { opacity: 0; }
 }
+
 @media (max-width: 1024px) {
-    .controls, .profile-column, .leaderboard-panel {
+    body {
+        height: 100dvh;
+        min-height: 100dvh;
+        padding: 0;
+        overflow: hidden;
+        }
+    /* Add #terminal-hint right here */
+    .controls, .profile-column, .leaderboard-panel, #terminal-hint {
         display: none !important;
     }
+    
     .game-column {
         padding: 0;
         border: none;
         background-color: transparent;
         backdrop-filter: none;
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
+        display: flex;
         justify-content: center;
+        align-items: center;
     }
     .layout-container {
         width: 100%;
+        height: 100dvh;
         margin: 0;
         gap: 0;
     }
