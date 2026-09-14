@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanishPoint — Terminalio</title>
+
+    <link rel="icon" type="image/png" href="/assets/flavi.png"[cite: 1]>
+    <link rel="stylesheet" href="/style.css">
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 90px;
+            padding-bottom: 60px;
+        }
+
+        .showcase-container {
+            max-width: 900px;
+            width: 92%;
+            background-color: rgba(13, 2, 8, 0.88);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.05);
+            z-index: 10;
+        }
+
+        /* Header & Icon */
+        .project-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            border-bottom: 1px dashed rgba(0, 255, 65, 0.3);
+            padding-bottom: 25px;
+            margin-bottom: 25px;
+        }
+
+        .project-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+            flex-shrink: 0;
+        }
+
+        .project-meta {
+            flex-grow: 1;
+        }
+
+        .project-title {
+            margin: 0 0 8px 0;
+            font-size: 2.2rem;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .badge-img {
+            height: 24px;
+        }
+
+        /* Typography & Structure */
+        .tagline-callout {
+            border-left: 3px solid #00ff41;
+            padding: 8px 16px;
+            background: rgba(0, 255, 65, 0.05);
+            color: #00ff41;
+            font-size: 1.05rem;
+            margin: 20px 0;
+        }
+
+        .lead-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+
+        .section-heading {
+            color: #00ff41;
+            font-size: 1.25rem;
+            margin: 35px 0 15px 0;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+            padding-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feature-item {
+            margin-bottom: 18px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+        }
+
+        .feature-item strong {
+            color: #fff;
+        }
+
+        /* Visual Screenshot Showcase */
+        .showcase-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .shot-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .shot-card:hover {
+            border-color: rgba(0, 255, 65, 0.5);
+        }
+
+        .shot-card h4 {
+            margin: 0 0 10px 0;
+            color: #00ff41;
+            font-size: 1rem;
+        }
+
+        .shot-img-wrap {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shot-img-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .caption {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        /* Buttons & Actions */
+        .action-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            border-top: 1px dashed rgba(0, 255, 65, 0.3);
+            padding-top: 25px;
+        }
+
+        .action-row a {
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .project-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .showcase-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="terminal-nav">
+        <div class="nav-brand">Terminalio / Projects</div>
+        <div class="menu-container">
+            <button id="menuToggle" class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div id="dropdownMenu" class="dropdown-menu">
+                <a href="/" class="menu-link">Home / Terminal Arcade</a>
+                <a href="/vanishpoint" class="menu-link active">VanishPoint</a>
+                <a href="/marceline" class="menu-link disabled">Marceline (Coming Soon)</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="showcase-container">
+        <!-- Header Profile -->
+        <div class="project-header">
+            <img src="/assets/vp128.png" alt="VanishPoint Icon" class="project-icon">
+            <div class="project-meta">
+                <h1 class="project-title">VanishPoint</h1>
+                <div class="badges">
+                    <img src="https://img.shields.io/badge/Google_Chrome-4285F4?style=for-the-badge&logo=Google-chrome&logoColor=white" alt="Chrome Badge" class="badge-img">
+                    <img src="https://img.shields.io/badge/Microsoft_Edge-0078D7?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Edge Badge" class="badge-img">
+                </div>
+            </div>
+        </div>
+
+        <div class="tagline-callout">
+            &gt; Automated privacy and tracking guard.
+        </div>
+
+        <p class="lead-text">
+            Take back your browsing experience. VanishPoint is a lightweight, zero-configuration privacy extension that works entirely in the background to stop invasive web tracking and eliminate consent popup fatigue.<br><br>
+            Instead of fighting with privacy settings on every new website you visit, VanishPoint automates the process.
+        </p>
+
+        <!-- Shield Features -->
+        <div class="section-heading">Shield Features</div>
+        
+        <div class="feature-item">
+            <strong>&gt; Global Privacy Control (GPC) Enforcement:</strong> VanishPoint dynamically modifies your browser's network requests to broadcast the <code>Sec-GPC: 1</code> signal. On legally compliant websites, this legally binds them to opt you out of data sharing and tracking before the page even finishes loading.
+        </div>
+        <div class="feature-item">
+            <strong>&gt; Cookie Banner Auto-Reject:</strong> Tired of manually clicking "Reject All"? For sites that ignore GPC signals, VanishPoint hunts down and automatically clicks the opt-out buttons on major Consent Management Platforms (like OneTrust and Cookiebot). You never even see the popup.
+        </div>
+        <div class="feature-item">
+            <strong>&gt; Zero-Breakage Browsing:</strong> VanishPoint only targets marketing, behavioral, and cross-site tracking cookies. "Strictly Necessary" cookies are completely ignored, meaning your logins, shopping carts, and site navigation remain fully intact.
+        </div>
+        <div class="feature-item">
+            <strong>&gt; Sleek, Minimalist Dashboard:</strong> A clean, dark-themed UI that tracks your active privacy sessions and lets you toggle the shield on or off with a single click.
+        </div>
+
+        <!-- Privacy First -->
+        <div class="section-heading">Privacy First</div>
+        <p class="lead-text" style="margin-bottom: 20px;">
+            VanishPoint is built for absolute privacy. It runs 100% locally on your machine. It does not phone home, it does not track your browsing history, and it does not send any of your data to external servers.
+        </p>
+
+        <!-- See It In Action -->
+        <div class="section-heading">See it in Action</div>
+
+        <div class="showcase-gallery">
+            <div class="shot-card">
+                <h4>Under the Hood: GPC Signal Injection</h4>
+                <div class="shot-img-wrap">
+                    <img src="/assets/VPSS3.jpg" alt="Network headers showing Sec-GPC: 1">
+                </div>
+                <div class="caption">VanishPoint dynamically injecting the Sec-GPC: 1 signal into the browser's network request headers.</div>
+            </div>
+
+            <div class="shot-card">
+                <h4>Active Shield & Dashboard</h4>
+                <div class="shot-img-wrap">
+                    <img src="/assets/VPSS1.jpg" alt="Shield Active">
+                </div>
+                <div class="caption">The minimalist dashboard tracking active privacy sessions while the GPC signal is successfully broadcasted and detected.</div>
+            </div>
+
+            <div class="shot-card">
+                <h4>Manual Toggle</h4>
+                <div class="shot-img-wrap">
+                    <img src="/assets/VPSS2.jpg" alt="Shield Inactive">
+                </div>
+                <div class="caption">Easily pause the extension with a single click if you ever need to bypass the shield for a specific site.</div>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <a href="https://github.com/danielharderpi-png/VanishPoint" target="_blank">
+                <button>Source Code (GitHub)</button>
+            </a>
+            <a href="/">
+                <button>Back to Terminal</button>
+            </a>
+        </div>
+    </main>
+
+    <div class="scanlines"></div>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('open');
+            menuToggle.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dropdownMenu.classList.remove('open');
+                menuToggle.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

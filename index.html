@@ -18,6 +18,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Top Navigation Header -->
+    <header class="terminal-nav">
+        <div class="nav-brand">Welcome to Terminalio</div>
+        <div class="menu-container">
+            <button id="menuToggle" class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div id="dropdownMenu" class="dropdown-menu">
+                <a href="/" class="menu-link active">Home / Terminal Arcade</a>
+                <a href="/vanishpoint" class="menu-link">VanishPoint</a>
+                <a href="/marceline" class="menu-link disabled">Marceline (Coming Soon)</a>
+            </div>
+        </div>
+    </header>
+
     <div class="layout-container">
         
         <div class="game-column">
@@ -83,6 +100,23 @@
     <div class="scanlines"></div>
 
     <script>
+    // Navigation Menu Logic
+    const menuToggle = document.getElementById('menuToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('open');
+        menuToggle.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdownMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            dropdownMenu.classList.remove('open');
+            menuToggle.classList.remove('active');
+        }
+    });
+
     // Check if the user is on a mobile device
     if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.matchMedia("(pointer: coarse)").matches) {
         let mobileScript = document.createElement('script');
