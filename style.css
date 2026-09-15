@@ -413,7 +413,7 @@ canvas {
 }
 
 @media (max-width: 1024px), (pointer: coarse) {
-    body {
+    body.arcade-page {
         height: 100dvh;
         min-height: 100dvh;
         padding: 0;
