@@ -30,7 +30,7 @@
             <div id="dropdownMenu" class="dropdown-menu">
                 <a href="/" class="menu-link active">Home / Terminal Arcade</a>
                 <a href="/vanishpoint" class="menu-link">VanishPoint</a>
-                <a href="/marceline" class="menu-link disabled">Marceline (Coming Soon)</a>
+                <a href="/marceline" class="menu-link">Project Marceline</a>
             </div>
         </div>
     </header>
@@ -103,17 +103,20 @@
     // Navigation Menu Logic
     const menuToggle = document.getElementById('menuToggle');
     const dropdownMenu = document.getElementById('dropdownMenu');
+    window.isMenuOpen = false;
 
     menuToggle.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdownMenu.classList.toggle('open');
         menuToggle.classList.toggle('active');
+        window.isMenuOpen = dropdownMenu.classList.contains('open'); 
     });
 
     document.addEventListener('click', (e) => {
         if (!dropdownMenu.contains(e.target) && !menuToggle.contains(e.target)) {
             dropdownMenu.classList.remove('open');
             menuToggle.classList.remove('active');
+            window.isMenuOpen = false; 
         }
     });
 

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marceline — Terminalio</title>
+
+    <link rel="icon" type="image/png" href="/assets/flavi.png">
+    <link rel="stylesheet" href="/style.css">
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 90px;
+            padding-bottom: 60px;
+        }
+
+        .showcase-container {
+            max-width: 900px;
+            width: 92%;
+            background-color: rgba(13, 2, 8, 0.88);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.05);
+            z-index: 10;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px dashed rgba(0, 255, 65, 0.3);
+            padding-bottom: 25px;
+            margin-bottom: 25px;
+        }
+
+        .project-title {
+            margin: 0 0 8px 0;
+            font-size: 2.2rem;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .tagline-callout {
+            border-left: 3px solid #00ff41;
+            padding: 8px 16px;
+            background: rgba(0, 255, 65, 0.05);
+            color: #00ff41;
+            font-size: 1.05rem;
+            margin: 20px 0;
+        }
+
+        .lead-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .section-heading {
+            color: #00ff41;
+            font-size: 1.25rem;
+            margin: 35px 0 15px 0;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+            padding-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feature-item {
+            margin-bottom: 18px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+        }
+
+        .feature-item strong {
+            color: #fff;
+        }
+
+        /* Controlled 16:9 YouTube Video Showcase */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 780px;
+            margin: 25px auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 65, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+            background-color: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Tech Specs & Economics Grid */
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .spec-card {
+            background: rgba(0, 255, 65, 0.03);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .spec-card .label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .spec-card .val {
+            font-size: 1rem;
+            color: #00ff41;
+            font-weight: bold;
+        }
+
+        /* Screenshot Gallery */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .gallery-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .gallery-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+
+        .img-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px dashed rgba(0, 255, 65, 0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(0, 255, 65, 0.6);
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .img-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            border-top: 1px dashed rgba(0, 255, 65, 0.3);
+            padding-top: 25px;
+        }
+
+        .action-row a {
+            text-decoration: none;
+        }
+
+        @media (max-width: 700px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            .showcase-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="terminal-nav">
+        <div class="nav-brand">Terminalio / Projects</div>
+        <div class="menu-container">
+            <button id="menuToggle" class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div id="dropdownMenu" class="dropdown-menu">
+                <a href="/" class="menu-link">Home / Terminal Arcade</a>
+                <a href="/vanishpoint" class="menu-link">VanishPoint</a>
+                <a href="/marceline" class="menu-link active">Marceline</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="showcase-container">
+        <!-- Header -->
+        <div class="project-header">
+            <div>
+                <h1 class="project-title">Marceline</h1>
+                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Self-Contained Local AI Assistant</div>
+            </div>
+            <div style="font-size: 0.85rem; color: #00ff41; border: 1px solid #00ff41; padding: 4px 8px; border-radius: 4px;">
+                STATUS: IN DEVELOPMENT
+            </div>
+        </div>
+
+        <div class="tagline-callout">
+            &gt; Air-gapped, high-throughput local intelligence powered by local LLM inference and private vector embeddings.
+        </div>
+
+        <p class="lead-text">
+            Marceline is an autonomous, fully offline desktop assistant designed to operate without reliance on cloud APIs or external inference providers. Operating strictly within the local network perimeter, it handles document indexing, contextual semantic search, and streaming conversational logic with total data isolation.
+        </p>
+
+        <!-- Video Demonstration -->
+        <div class="section-heading">System Walkthrough</div>
+        <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 10px;">
+            Full end-to-end demo showing offline startup, retrieval augmented queries, and hardware resource consumption during generation:
+        </p>
+
+        <div class="video-wrapper">
+            <!-- Video updated to use the provided YouTube link -->
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/96j0IZeK2Ks?rel=0&modestbranding=1&color=white" 
+                title="Marceline System Walkthrough" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <!-- Technical Specifications -->
+        <div class="section-heading">Core Architecture</div>
+        <div class="spec-grid">
+            <div class="spec-card">
+                <div class="label">Backend Runtime</div>
+                <div class="val">Python / FastAPI</div>
+            </div>
+            <div class="spec-card">
+                <div class="label">Inference Engine</div>
+                <div class="val">Meta Llama 3.2 / Unsloth</div>
+            </div>
+            <div class="spec-card">
+                <div class="label">Vector Database</div>
+                <div class="val">ChromaDB</div>
+            </div>
+            <div class="spec-card">
+                <div class="label">Security Boundary</div>
+                <div class="val">Air-Gapped / Offline</div>
+            </div>
+        </div>
+
+        <!-- The Business Case / ROI Section -->
+        <div class="section-heading">The Business Case: True Margin vs. The API Meter</div>
+
+        <p class="lead-text">
+            Cloud AI vendors charge you like a utility company: every document indexed, prompt submitted, and token streamed is an ongoing metered liability. Marceline treats artificial intelligence as fixed capital equipment—delivering zero variable operational cost per query, complete compliance immunity, and unmatched gross margins.
+        </p>
+
+        <div class="spec-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+            <div class="spec-card">
+                <div class="label">Cloud API Economics</div>
+                <div class="val" style="color: #ff5555;">Metered Variable Tax</div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin-top: 8px;">
+                    Token fees, embedding calls, egress bandwidth, and seat licenses scale aggressively with company growth. High query volume turns your AI infrastructure into a compounding operational expense.
+                </p>
+            </div>
+            <div class="spec-card">
+                <div class="label">Marceline Local Architecture</div>
+                <div class="val" style="color: #00ff41;">Fixed Amortization</div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin-top: 8px;">
+                    Deployed on existing local compute. Marginal cost per inference: $0.00. Query 10 times a day or 100,000 times an hour—the infrastructure cost remains strictly flat.
+                </p>
+            </div>
+            <div class="spec-card">
+                <div class="label">Compliance & Liability</div>
+                <div class="val" style="color: #00ff41;">Zero-Exposure Perimeter</div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin-top: 8px;">
+                    Proprietary code, confidential records, and client PII never cross an external gateway. Eliminates vendor audit overhead, breach exposure, and external data processing agreements.
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <div class="feature-item">
+                <strong>&gt; Eliminating RAG Ingestion Penalties:</strong> Traditional enterprise RAG pipelines hit you twice: once to vectorize large document sets via hosted embedding APIs, and again on context windows during prompt retrieval. With local ChromaDB embeddings and native parameter execution, ingesting gigabytes of proprietary documents incurs zero third-party billing.
+            </div>
+            <div class="feature-item">
+                <strong>&gt; Shielded from Rate Limits & Outages:</strong> Relying on external APIs introduces third-party downtime, sudden deprecation cycles, and arbitrary concurrency throttling. Marceline guarantees continuous uptime and deterministic latency across local hardware—even in fully disconnected or field environments.
+            </div>
+            <div class="feature-item">
+                <strong>&gt; Clean Gross Margin for Integrators:</strong> For service providers and MSPs deploying custom assistants into client offices, local inference turns AI from an ongoing subscription burden into a high-margin appliance sale with predictable maintenance contracts.
+            </div>
+        </div>
+
+        <!-- Frame Captures / Gallery -->
+        <div class="section-heading">Interface & Operations</div>
+        <div class="gallery-grid">
+            <div class="gallery-card">
+                <h4>01. Context Ingestion & RAG Index</h4>
+                <div class="img-placeholder">
+                    [ Screenshot: Vector Store Indexing ]
+                </div>
+            </div>
+            <div class="gallery-card">
+                <h4>02. Local Chat Interface</h4>
+                <div class="img-placeholder">
+                    [ Screenshot: Active Generation UI ]
+                </div>
+            </div>
+            <div class="gallery-card">
+                <h4>03. VRAM & Compute Telemetry</h4>
+                <div class="img-placeholder">
+                    [ Screenshot: GPU & Memory Utilization ]
+                </div>
+            </div>
+            <div class="gallery-card">
+                <h4>04. Fast Execution Terminal</h4>
+                <div class="img-placeholder">
+                    [ Screenshot: Server Logs & Token Speed ]
+                </div>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <a href="/">
+                <button>Back to Terminal</button>
+            </a>
+            <a href="/vanishpoint">
+                <button>View VanishPoint</button>
+            </a>
+        </div>
+    </main>
+
+    <div class="scanlines"></div>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('open');
+            menuToggle.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dropdownMenu.classList.remove('open');
+                menuToggle.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

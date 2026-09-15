@@ -226,6 +226,9 @@ function mobileGameLoop(timestamp) {
 
 // --- CONTROLS ---
 window.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.terminal-nav')) return;
+    if (window.isMenuOpen) return;
+
     e.preventDefault(); 
     
     if (gameState === 'idle') {
@@ -331,7 +334,7 @@ backBtn.style.fontFamily = 'monospace';
 backBtn.style.fontSize = '28px';
 backBtn.style.fontWeight = 'bold';
 backBtn.style.position = 'absolute';
-backBtn.style.top = '2.5dvh'; 
+backBtn.style.top = '75px'; 
 backBtn.style.right = '25px';
 backBtn.style.cursor = 'pointer';
 backBtn.style.userSelect = 'none';
